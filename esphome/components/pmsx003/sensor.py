@@ -2,9 +2,9 @@ import esphome.codegen as cg
 import esphome.config_validation as cv
 from esphome.components import sensor, uart
 from esphome.const import CONF_FORMALDEHYDE, CONF_HUMIDITY, CONF_ID, CONF_PM_10_0, \
-    CONF_PM_1_0, CONF_PM_2_5, CONF_TEMPERATURE, CONF_TYPE, ICON_CHEMICAL_WEAPON, \
-    UNIT_MICROGRAMS_PER_CUBIC_METER, ICON_THERMOMETER, ICON_WATER_PERCENT, UNIT_CELSIUS, \
-    UNIT_PERCENT
+    CONF_PM_1_0, CONF_PM_2_5, CONF_UPDATE_INTERVAL, CONF_TEMPERATURE, CONF_TYPE, \
+    ICON_CHEMICAL_WEAPON, UNIT_MICROGRAMS_PER_CUBIC_METER, ICON_THERMOMETER, \
+    ICON_WATER_PERCENT, UNIT_CELSIUS, UNIT_PERCENT
 
 DEPENDENCIES = ['uart']
 
@@ -56,6 +56,8 @@ CONFIG_SCHEMA = cv.Schema({
         sensor.sensor_schema(UNIT_PERCENT, ICON_WATER_PERCENT, 1),
     cv.Optional(CONF_FORMALDEHYDE):
         sensor.sensor_schema(UNIT_MICROGRAMS_PER_CUBIC_METER, ICON_CHEMICAL_WEAPON, 0),
+    cv.Optional(CONF_UPDATE_INTERVAL, default='0ms'):
+        cv.positive_time_period_milliseconds,
 }).extend(cv.COMPONENT_SCHEMA).extend(uart.UART_DEVICE_SCHEMA)
 
 
@@ -65,6 +67,7 @@ def to_code(config):
     yield uart.register_uart_device(var, config)
 
     cg.add(var.set_type(config[CONF_TYPE]))
+    cg.add(var.set_update_interval(config[CONF_UPDATE_INTERVAL]))
 
     if CONF_PM_1_0 in config:
         sens = yield sensor.new_sensor(config[CONF_PM_1_0])
